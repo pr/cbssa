@@ -175,7 +175,7 @@ def linear_reg_train(x, y, const=True, weight=None, missing="delete"):
     if weight is not None:
         model = sm.WLS(y, x, weights=weight)
         result = model.fit()
-    if weight is None:
+    else:
         model = sm.OLS(y, x)
         result = model.fit()
 
