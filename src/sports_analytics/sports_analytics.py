@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 
-def logistic_reg_train(x, y, const=True, weight=None, missing='delete'):
+def logistic_reg_train(x, y, const=True, weight=None, missing="delete"):
     """Train a Logistic Regression Model
 
     Args:
@@ -19,7 +19,7 @@ def logistic_reg_train(x, y, const=True, weight=None, missing='delete'):
             Indicator for the constant term (intercept) in the fit.
         weight: 1d numpy array,
             weight of each column
-        missing: 'delete','nearest','mean','median',constant number
+        missing: "delete","nearest","mean","median",constant number
             the method to handle the missing value
 
     Returns:
@@ -27,22 +27,22 @@ def logistic_reg_train(x, y, const=True, weight=None, missing='delete'):
     """
     data_set = pd.concat([x, y], axis=1)
 
-    if missing is 'delete':
+    if missing is "delete":
         data_set = data_set.dropna()
-    elif missing is 'nearest':
-        data_set = data_set.fillna(method='ffill')
-        data_set = data_set.fillna(method='bfile')
-    elif missing is 'mean':
+    elif missing is "nearest":
+        data_set = data_set.fillna(method="ffill")
+        data_set = data_set.fillna(method="bfile")
+    elif missing is "mean":
         values = dict(data_set.mean())
         data_set = data_set.fillna(value=values)
-    elif missing is 'median':
+    elif missing is "median":
         values = dict(data_set.median())
         data_set = data_set.fillna(value=values)
     else:
         try:
             const = float(missing)
         except:
-            print("Error: Type of Missing. please enter one of 'delete','nearest','mean','median',constant number")
+            print('Error: Type of Missing. please enter one of "delete","nearest","mean","median",constant number')
             return None
         data_set = data_set.fillna(const)
     x = data_set[data_set.columns.values[:-1]]
@@ -53,30 +53,30 @@ def logistic_reg_train(x, y, const=True, weight=None, missing='delete'):
 
     if const is True:
         x = sm.add_constant(x)
-        columns_name = ['const'] + ['x%s' % n for n in range(1, x.shape[1])]
+        columns_name = ["const"] + ["x%s" % n for n in range(1, x.shape[1])]
     else:
-        columns_name = ['x%s' % n for n in range(1, x.shape[1])]
+        columns_name = ["x%s" % n for n in range(1, x.shape[1])]
 
     model = discrete_model.Logit(y, x)
     result = model.fit()
 
     try:
-        mdl_coeff = pd.DataFrame(data=dict(result.params), index={'Coefficients'})
-        mdl_se = pd.DataFrame(data=dict(result.bse), index={'Std error'})
-        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index={'p-value'})
+        mdl_coeff = pd.DataFrame(data=dict(result.params), index={"Coefficients"})
+        mdl_se = pd.DataFrame(data=dict(result.bse), index={"Std error"})
+        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index={"p-value"})
 
     except:
-        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns={'Coefficients'}).T
-        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns={'Std error'}).T
-        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns={'p-value'}).T
+        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns={"Coefficients"}).T
+        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns={"Std error"}).T
+        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns={"p-value"}).T
 
     summary_table = pd.concat((mdl_coeff, mdl_se, mdl_pvalue))
-    summary_table.loc['Log-likelihood', summary_table.columns.values[0]] = result.llf
-    summary_table.loc['Number valid obs', summary_table.columns.values[0]] = result.df_resid
-    summary_table.loc['Total obs', summary_table.columns.values[0]] = result.nobs
+    summary_table.loc["Log-likelihood", summary_table.columns.values[0]] = result.llf
+    summary_table.loc["Number valid obs", summary_table.columns.values[0]] = result.df_resid
+    summary_table.loc["Total obs", summary_table.columns.values[0]] = result.nobs
 
-    pd.set_option('display.float_format', lambda a: '%.4f' % a)
-    summary_table = summary_table.fillna('')
+    pd.set_option("display.float_format", lambda a: "%.4f" % a)
+    summary_table = summary_table.fillna("")
 
     try:
         summary_table.index.name = y.name
@@ -85,7 +85,7 @@ def logistic_reg_train(x, y, const=True, weight=None, missing='delete'):
 
     print(summary_table)
     result.SummaryTable = summary_table
-    pd.set_option('display.float_format', lambda a: '%.2f' % a)
+    pd.set_option("display.float_format", lambda a: "%.2f" % a)
 
     return result
 
@@ -103,22 +103,22 @@ def logistic_reg_predict(model, x):
     Returns:
         Array of predictions
     """
-    if 'const' in model.SummaryTable.columns.values:
-        print('adding constant')
-        x = sm.add_constant(x, has_constant='add')
+    if "const" in model.SummaryTable.columns.values:
+        print("adding constant")
+        x = sm.add_constant(x, has_constant="add")
     print(x)
     prediction = model.predict(x)
 
     data = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
-    if 'const' in model.SummaryTable.columns.values:
-        data = data.drop(['const'], axis=1)
-    data['prediction'] = prediction
+    if "const" in model.SummaryTable.columns.values:
+        data = data.drop(["const"], axis=1)
+    data["prediction"] = prediction
 
     result = data
     return result
 
 
-def linear_reg_train(x, y, const=True, weight=None, missing='delete'):
+def linear_reg_train(x, y, const=True, weight=None, missing="delete"):
     """Train a Linear Regression Model
 
     Args:
@@ -131,7 +131,7 @@ def linear_reg_train(x, y, const=True, weight=None, missing='delete'):
             Indicator for the constant term (intercept) in the fit.
         weight: 1d numpy array,
             weight of each column
-        missing: 'delete','nearest','mean','median',constant number
+        missing: "delete","nearest","mean","median",constant number
             the method to handle the missing value
 
     Returns:
@@ -139,22 +139,22 @@ def linear_reg_train(x, y, const=True, weight=None, missing='delete'):
     """
     data_set = pd.concat([x, y], axis=1)
 
-    if missing is 'delete':
+    if missing is "delete":
         data_set = data_set.dropna()
-    elif missing is 'nearest':
-        data_set = data_set.fillna(method='ffill')
-        data_set = data_set.fillna(method='bfill')
-    elif missing is 'mean':
+    elif missing is "nearest":
+        data_set = data_set.fillna(method="ffill")
+        data_set = data_set.fillna(method="bfill")
+    elif missing is "mean":
         values = dict(data_set.mean())
         data_set = data_set.fillna(value=values)
-    elif missing is 'median':
+    elif missing is "median":
         values = dict(data_set.median())
         data_set = data_set.fillna(value=values)
     else:
         try:
             const = float(missing)
         except:
-            print("Error: Type of Missing. please enter one of 'delete','nearest','mean','median',constant number")
+            print('Error: Type of Missing. please enter one of "delete","nearest","mean","median",constant number')
             return None
         data_set = data_set.fillna(const)
     x = data_set[data_set.columns.values[:-1]]
@@ -162,9 +162,9 @@ def linear_reg_train(x, y, const=True, weight=None, missing='delete'):
 
     if const is True:
         x = sm.add_constant(x)
-        columns_name = ['const'] + ['x%s' % n for n in range(1, x.shape[1])]
+        columns_name = ["const"] + ["x%s" % n for n in range(1, x.shape[1])]
     else:
-        columns_name = ['x%s' % n for n in range(1, x.shape[1])]
+        columns_name = ["x%s" % n for n in range(1, x.shape[1])]
 
     if weight is not None:
         model = sm.WLS(y, x, weights=weight)
@@ -174,22 +174,22 @@ def linear_reg_train(x, y, const=True, weight=None, missing='delete'):
         result = model.fit()
 
     try:
-        mdl_coeff = pd.DataFrame(data=dict(result.params), index={'Coefficients'})
-        mdl_se = pd.DataFrame(data=dict(result.bse), index={'Std error'})
-        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index={'p-value'})
+        mdl_coeff = pd.DataFrame(data=dict(result.params), index={"Coefficients"})
+        mdl_se = pd.DataFrame(data=dict(result.bse), index={"Std error"})
+        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index={"p-value"})
 
     except:
-        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns={'Coefficients'}).T
-        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns={'Std error'}).T
-        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns={'p-value'}).T
+        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns={"Coefficients"}).T
+        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns={"Std error"}).T
+        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns={"p-value"}).T
 
     summary_table = pd.concat((mdl_coeff, mdl_se, mdl_pvalue))
-    summary_table.loc['Log-likelihood', summary_table.columns.values[0]] = result.llf
-    summary_table.loc['Number valid obs', summary_table.columns.values[0]] = result.df_resid
-    summary_table.loc['Total obs', summary_table.columns.values[0]] = result.nobs
+    summary_table.loc["Log-likelihood", summary_table.columns.values[0]] = result.llf
+    summary_table.loc["Number valid obs", summary_table.columns.values[0]] = result.df_resid
+    summary_table.loc["Total obs", summary_table.columns.values[0]] = result.nobs
 
-    pd.set_option('display.float_format', lambda a: '%.2f' % a)
-    summary_table = summary_table.fillna('')
+    pd.set_option("display.float_format", lambda a: "%.2f" % a)
+    summary_table = summary_table.fillna("")
 
     try:
         summary_table.index.name = y.name
@@ -214,15 +214,15 @@ def linear_reg_predict(model, x):
     Returns:
         Array of predictions
     """
-    if 'const' in model.SummaryTable.columns.values:
+    if "const" in model.SummaryTable.columns.values:
         x = sm.add_constant(x)
 
     prediction = model.predict(x)
 
     data = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
-    if 'const' in model.SummaryTable.columns.values:
-        data = data.drop(['const'], axis=1)
-    data['prediction'] = prediction
+    if "const" in model.SummaryTable.columns.values:
+        data = data.drop(["const"], axis=1)
+    data["prediction"] = prediction
 
     result = data
     return result
@@ -250,21 +250,21 @@ def print_binned_stats(buckets, col1, col2):
     avg2 = []
     stderr2 = []
     for i in range(len(buckets) - 1):
-        idx_label.append('[%s,%s)' % (buckets[i], buckets[i + 1]))
+        idx_label.append("[%s,%s)" % (buckets[i], buckets[i + 1]))
         count.append(col1[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].count())
         avg1.append(col1[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].mean())
         avg2.append(col2[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].mean())
         stderr2.append(col2[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].sem() * 2)
 
-    idx_label[-1] = ('[%s,%s]' % (buckets[i], buckets[i + 1]))
+    idx_label[-1] = ("[%s,%s]" % (buckets[i], buckets[i + 1]))
 
-    data_dic['Bins'] = idx_label
-    data_dic['Count'] = count
-    data_dic['Avg ' + col1.name] = avg1
-    data_dic['Avg ' + col2.name] = avg2
-    data_dic['Stderr ' + col2.name] = stderr2
+    data_dic["Bins"] = idx_label
+    data_dic["Count"] = count
+    data_dic["Avg " + col1.name] = avg1
+    data_dic["Avg " + col2.name] = avg2
+    data_dic["Stderr " + col2.name] = stderr2
 
-    order_list = ['Bins', 'Count', 'Avg ' + col1.name, 'Avg ' + col2.name, 'Stderr ' + col2.name]
+    order_list = ["Bins", "Count", "Avg " + col1.name, "Avg " + col2.name, "Stderr " + col2.name]
     summary_table = pd.DataFrame(data=data_dic)[order_list]
     print(summary_table)
     return summary_table
@@ -319,8 +319,8 @@ def graph_binned_stats_with_prediction(
     else:
         plt.plot(line_x, line_y, line_style)
 
-    plt.xlabel('distance')
-    plt.ylabel('make')
+    plt.xlabel("distance")
+    plt.ylabel("make")
 
     return fig
 
@@ -369,13 +369,13 @@ def rmse(error_values=None, prediction_values=None, truth=None):
         if prediction_values is None and truth is None:
             rmse_array = np.sqrt(np.mean(error_values ** 2, axis=0))
         else:
-            print('Error: only define errorValues, or only define PredictionValue and Truth')
+            print("Error: only define errorValues, or only define PredictionValue and Truth")
             return None
     else:
         if prediction_values is not None and truth is not None:
             rmse_array = np.sqrt(np.mean((prediction_values.transpose() - truth) ** 2))
         else:
-            print('Error: only define errorValues, or only define PredictionValue and Truth')
+            print("Error: only define errorValues, or only define PredictionValue and Truth")
             return None
 
     return rmse_array
@@ -401,7 +401,7 @@ def model_test(error_values=None, prediction_values=None, truth=None):
             sq_err = error_values.values ** 2
             names = list(error_values.columns.values)
         else:
-            print('Error: only define errorValues, or only define PredictionValue and Truth')
+            print("Error: only define errorValues, or only define PredictionValue and Truth")
             return None
     else:
         if prediction_values is not None and truth is not None:
@@ -409,7 +409,7 @@ def model_test(error_values=None, prediction_values=None, truth=None):
             sq_err = (prediction_values.values - truth.values) ** 2
             names = list(prediction_values.columns.values)
         else:
-            print('Error: only define errorValues, or only define PredictionValue and Truth')
+            print("Error: only define errorValues, or only define PredictionValue and Truth")
             return None
 
     pvalue_matrix = np.empty(shape=(sq_err.shape[1], sq_err.shape[1]))
@@ -425,7 +425,7 @@ def model_test(error_values=None, prediction_values=None, truth=None):
     summary_table.columns = names
     summary_table.index = ["RMSE"] + names
     print(summary_table)
-    summary_table = summary_table.fillna('')
+    summary_table = summary_table.fillna("")
     return summary_table
 
 
