@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cbssa"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Columbia Business School", email="peter@peter.net" },
 ]
@@ -15,6 +15,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+]
+install_requires = [
+    "numpy", "pandas", "statsmodels", "matplotlib", "scipy"
 ]
 
 [project.urls]
