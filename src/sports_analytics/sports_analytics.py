@@ -6,7 +6,13 @@ import matplotlib.pyplot as plt
 from scipy import stats
 
 
-def logistic_reg_train(x, y, const=True, weight=None, missing="delete"):
+def logistic_reg_train(
+        x: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
+        const: bool = True,
+        weight: np.array = None,
+        missing: any = "delete"
+) -> discrete_model.BinaryResultsWrapper | None:
     """Train a Logistic Regression Model
 
     Args:
@@ -61,14 +67,14 @@ def logistic_reg_train(x, y, const=True, weight=None, missing="delete"):
     result = model.fit()
 
     try:
-        mdl_coeff = pd.DataFrame(data=dict(result.params), index={"Coefficients"})
-        mdl_se = pd.DataFrame(data=dict(result.bse), index={"Std error"})
-        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index={"p-value"})
+        mdl_coeff = pd.DataFrame(data=dict(result.params), index=["Coefficients"])
+        mdl_se = pd.DataFrame(data=dict(result.bse), index=["Std error"])
+        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index=["p-value"])
 
     except:
-        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns={"Coefficients"}).T
-        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns={"Std error"}).T
-        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns={"p-value"}).T
+        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns=["Coefficients"]).T
+        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns=["Std error"]).T
+        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns=["p-value"]).T
 
     summary_table = pd.concat((mdl_coeff, mdl_se, mdl_pvalue))
     summary_table.loc["Log-likelihood", summary_table.columns.values[0]] = result.llf
@@ -174,14 +180,14 @@ def linear_reg_train(x, y, const=True, weight=None, missing="delete"):
         result = model.fit()
 
     try:
-        mdl_coeff = pd.DataFrame(data=dict(result.params), index={"Coefficients"})
-        mdl_se = pd.DataFrame(data=dict(result.bse), index={"Std error"})
-        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index={"p-value"})
+        mdl_coeff = pd.DataFrame(data=dict(result.params), index=["Coefficients"])
+        mdl_se = pd.DataFrame(data=dict(result.bse), index=["Std error"])
+        mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index=["p-value"])
 
     except:
-        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns={"Coefficients"}).T
-        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns={"Std error"}).T
-        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns={"p-value"}).T
+        mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns=["Coefficients"]).T
+        mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns=["Std error"]).T
+        mdl_pvalue = pd.DataFrame(data=result.pvalues, index=columns_name, columns=["p-value"]).T
 
     summary_table = pd.concat((mdl_coeff, mdl_se, mdl_pvalue))
     summary_table.loc["Log-likelihood", summary_table.columns.values[0]] = result.llf
