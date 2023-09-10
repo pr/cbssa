@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 
-from src.sports_analytics import sports_analytics
-from src.sports_analytics import legacy
+from src.cbssa import sports_analytics
+from src.cbssa import legacy
 
 
 class TestSportsAnalytics:

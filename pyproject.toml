@@ -3,12 +3,12 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sports_analytics"
+name = "cbssa"
 version = "0.0.1"
 authors = [
   { name="Columbia Business School", email="peter@peter.net" },
 ]
-description = "CBS Sports Analytics"
+description = "Columbia Business School Sports Analytics"
 readme = "README.md"
 requires-python = ">=3.7"
 classifiers = [
@@ -18,5 +18,5 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/pr/sports_analytics"
-"Bug Tracker" = "https://github.com/pr/sports_analytics/issues"
+"Homepage" = "https://github.com/pr/cbssa"
+"Bug Tracker" = "https://github.com/pr/cbssa/issues"
