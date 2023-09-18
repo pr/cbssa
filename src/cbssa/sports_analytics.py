@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
+import statsmodels.discrete.discrete_model
 import statsmodels.discrete.discrete_model as discrete_model
 import matplotlib.pyplot as plt
 from enum import Enum
@@ -24,6 +25,7 @@ def logistic_reg_train(
         missing_fill_value: float = None,
         print_table: bool = False,
 ) -> discrete_model.BinaryResultsWrapper | None:
+
     data_set = pd.concat([x, y], axis=1)
 
     match missing:
@@ -91,19 +93,11 @@ def logistic_reg_train(
     return result
 
 
-def logistic_reg_predict(model, x):
-    """Make prediction based on the trained logistic regression model
-    make sure input X is of the same format as training X data for the model
+def logistic_reg_predict(
+        model: statsmodels.discrete.discrete_model.BinaryResultsWrapper,
+        x: pd.DataFrame | np.ndarray,
+) -> pd.DataFrame:
 
-    Args:
-        model: statsmodels.discrete.discrete_model.BinaryResultsWrapper
-            a logistic regression model
-        x: pandas DataFrame, or numpy ndarray
-            independent variables, each column represents one variable
-
-    Returns:
-        Array of predictions
-    """
     if "const" in model.SummaryTable.columns.values:
         x = sm.add_constant(x, has_constant="add")
 
