@@ -3,7 +3,16 @@ import pandas as pd
 import statsmodels.api as sm
 import statsmodels.discrete.discrete_model as discrete_model
 import matplotlib.pyplot as plt
+from enum import Enum
 from scipy import stats
+
+
+class MissingValueAction(Enum):
+    DELETE = "delete"
+    NEAREST = "nearest"
+    MEAN = "mean"
+    MEDIAN = "median"
+    FILL_VALUE = "fill_value"
 
 
 def logistic_reg_train(
@@ -11,49 +20,31 @@ def logistic_reg_train(
         y: pd.DataFrame | np.ndarray,
         const: bool = True,
         weight: np.array = None,
-        missing: any = "delete",
+        missing: MissingValueAction = MissingValueAction.DELETE,
+        missing_fill_value: float = None,
         print_table: bool = False,
 ) -> discrete_model.BinaryResultsWrapper | None:
-    """Train a Logistic Regression Model
-
-    Args:
-        x: pandas DataFrame, or numpy ndarray
-            independent variables, each column represents one variable
-            X and Y has the same index
-        y: pandas DataFrame, or numpy ndarray
-            dependent variable, one column
-        const: boolean, default True
-            Indicator for the constant term (intercept) in the fit.
-        weight: 1d numpy array,
-            weight of each column
-        missing: "delete","nearest","mean","median",constant number
-            the method to handle the missing value
-        print_table: boolean, default False
-            print the table or not
-
-    Returns:
-        A logistic regression model
-    """
     data_set = pd.concat([x, y], axis=1)
 
-    if missing is "delete":
-        data_set = data_set.dropna()
-    elif missing is "nearest":
-        data_set = data_set.fillna(method="ffill")
-        data_set = data_set.fillna(method="bfile")
-    elif missing is "mean":
-        values = dict(data_set.mean())
-        data_set = data_set.fillna(value=values)
-    elif missing is "median":
-        values = dict(data_set.median())
-        data_set = data_set.fillna(value=values)
-    else:
-        try:
-            const = float(missing)
-        except:
-            print('Error: Type of Missing. please enter one of "delete","nearest","mean","median",constant number')
-            return None
-        data_set = data_set.fillna(const)
+    match missing:
+        case MissingValueAction.DELETE:
+            data_set = data_set.dropna()
+        case MissingValueAction.NEAREST:
+            data_set = data_set.fillna(method="ffill")
+            data_set = data_set.fillna(method="bfile")
+        case MissingValueAction.MEAN:
+            values = dict(data_set.mean())
+            data_set = data_set.fillna(value=values)
+        case MissingValueAction.MEDIAN:
+            values = dict(data_set.median())
+            data_set = data_set.fillna(value=values)
+        case MissingValueAction.FILL_VALUE:
+            if missing_fill_value is None or type(missing_fill_value) != float:
+                raise Exception("if 'missing' is 'fill_value', then pass a float 'missing_fill_value'")
+            data_set = data_set.fillna(missing_fill_value)
+        case _:
+            raise Exception("parameter 'missing' has invalid value")
+
     x = data_set[data_set.columns.values[:-1]]
     y = data_set[data_set.columns.values[-1]]
 

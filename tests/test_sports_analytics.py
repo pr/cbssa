@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 import numpy as np
 
 from src.cbssa import sports_analytics
@@ -31,6 +32,23 @@ class TestSportsAnalytics:
 
         assert mdl.SummaryTable.at["Coefficients", "const"] == 14.043798183157614
         assert mdl.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
+
+    def test_logistic_reg_train_bad_missing_input(self):
+        data = get_data()
+
+        logit_reg_x = np.stack([data.dist.values, data.dist.values ** 2 / 100, data.dist.values ** 3 / 1000]).T
+        data_logit_reg_x = pd.DataFrame(data=logit_reg_x, columns=['dist', 'dist^2/100', 'dist^3/1000'])
+        data_logit_reg_y = data.make
+
+        with pytest.raises(Exception) as exception:
+            sports_analytics.logistic_reg_train(
+                data_logit_reg_x,
+                data_logit_reg_y,
+                missing=sports_analytics.MissingValueAction.FILL_VALUE,
+                missing_fill_value=None
+            )
+
+        assert exception.value.args[0] == "if 'missing' is 'fill_value', then pass a float 'missing_fill_value'"
 
     def test_logistic_reg_predict(self):
         mdl = get_model()
