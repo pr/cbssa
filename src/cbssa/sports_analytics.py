@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 import statsmodels.api as sm
-import statsmodels.discrete.discrete_model
 import statsmodels.discrete.discrete_model as discrete_model
+import statsmodels.regression.linear_model as linear_model
+import matplotlib.figure
 import matplotlib.pyplot as plt
 from enum import Enum
 from scipy import stats
@@ -24,7 +25,7 @@ def logistic_reg_train(
         missing: MissingValueAction = MissingValueAction.DELETE,
         missing_fill_value: float = None,
         print_table: bool = False,
-) -> discrete_model.BinaryResultsWrapper | None:
+) -> discrete_model.BinaryResultsWrapper:
 
     data_set = pd.concat([x, y], axis=1)
 
@@ -94,7 +95,7 @@ def logistic_reg_train(
 
 
 def logistic_reg_predict(
-        model: statsmodels.discrete.discrete_model.BinaryResultsWrapper,
+        model: discrete_model.BinaryResultsWrapper,
         x: pd.DataFrame | np.ndarray,
 ) -> pd.DataFrame:
 
@@ -103,56 +104,45 @@ def logistic_reg_predict(
 
     prediction = model.predict(x)
 
-    data = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
+    result = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
     if "const" in model.SummaryTable.columns.values:
-        data = data.drop(["const"], axis=1)
-    data["prediction"] = prediction
+        result = result.drop(["const"], axis=1)
+    result["prediction"] = prediction
 
-    result = data
     return result
 
 
-def linear_reg_train(x, y, const=True, weight=None, missing="delete", print_table=False):
-    """Train a Linear Regression Model
+def linear_reg_train(
+        x: pd.DataFrame | np.ndarray,
+        y: pd.DataFrame | np.ndarray,
+        const: bool = True,
+        weight: np.array = None,
+        missing: MissingValueAction = MissingValueAction.DELETE,
+        missing_fill_value: float = None,
+        print_table=False,
+) -> linear_model.RegressionResults:
 
-    Args:
-        x: pandas DataFrame, or numpy ndarray
-            independent variables, each column represents one variable
-            X and Y has the same index
-        y: pandas DataFrame, or numpy ndarray
-            dependent variable, one column
-        const: boolean, default True
-            Indicator for the constant term (intercept) in the fit.
-        weight: 1d numpy array,
-            weight of each column
-        missing: "delete","nearest","mean","median",constant number
-            the method to handle the missing value
-        print_table: boolean, default False
-            print the table or not
-
-    Returns:
-        A linear regression model
-    """
     data_set = pd.concat([x, y], axis=1)
 
-    if missing is "delete":
-        data_set = data_set.dropna()
-    elif missing is "nearest":
-        data_set = data_set.fillna(method="ffill")
-        data_set = data_set.fillna(method="bfill")
-    elif missing is "mean":
-        values = dict(data_set.mean())
-        data_set = data_set.fillna(value=values)
-    elif missing is "median":
-        values = dict(data_set.median())
-        data_set = data_set.fillna(value=values)
-    else:
-        try:
-            const = float(missing)
-        except:
-            print('Error: Type of Missing. please enter one of "delete","nearest","mean","median",constant number')
-            return None
-        data_set = data_set.fillna(const)
+    match missing:
+        case MissingValueAction.DELETE:
+            data_set = data_set.dropna()
+        case MissingValueAction.NEAREST:
+            data_set = data_set.fillna(method="ffill")
+            data_set = data_set.fillna(method="bfile")
+        case MissingValueAction.MEAN:
+            values = dict(data_set.mean())
+            data_set = data_set.fillna(value=values)
+        case MissingValueAction.MEDIAN:
+            values = dict(data_set.median())
+            data_set = data_set.fillna(value=values)
+        case MissingValueAction.FILL_VALUE:
+            if missing_fill_value is None or type(missing_fill_value) != float:
+                raise Exception("if 'missing' is 'fill_value', then pass a float 'missing_fill_value'")
+            data_set = data_set.fillna(missing_fill_value)
+        case _:
+            raise Exception("parameter 'missing' has invalid value")
+
     x = data_set[data_set.columns.values[:-1]]
     y = data_set[data_set.columns.values[-1]]
 
@@ -200,48 +190,30 @@ def linear_reg_train(x, y, const=True, weight=None, missing="delete", print_tabl
     return result
 
 
-def linear_reg_predict(model, x):
-    """Make prediction based on the trained linear regression model
-    make sure input X is of the same format as training X data for the model
+def linear_reg_predict(
+        model: linear_model.RegressionResultsWrapper,
+        x: pd.DataFrame | np.ndarray,
+) -> pd.DataFrame:
 
-    Args:
-        model: statsmodels linear regression model
-        x: pandas DataFrame, or numpy ndarray
-            independent variables, each column represents one variable
-
-    Returns:
-        Array of predictions
-    """
     if "const" in model.SummaryTable.columns.values:
         x = sm.add_constant(x)
 
     prediction = model.predict(x)
 
-    data = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
+    result = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
     if "const" in model.SummaryTable.columns.values:
-        data = data.drop(["const"], axis=1)
-    data["prediction"] = prediction
+        result = result.drop(["const"], axis=1)
+    result["prediction"] = prediction
 
-    result = data
     return result
 
 
-def get_binned_stats(buckets, col1, col2, print_table=False):
-    """Get the table of binned stats
-
-    Args:
-        buckets: list of float
-            a list of buckets boundaries
-        col1: pandas DataFrame, or numpy ndarray
-            reference column
-        col2: pandas DataFrame, or numpy ndarray
-            data value column
-        print_table: boolean, default False
-            print the table or not
-
-    Returns:
-        table of binned stats
-    """
+def get_binned_stats(
+        buckets: list[float],
+        col1: pd.DataFrame | np.ndarray,
+        col2: pd.DataFrame | np.ndarray,
+        print_table: bool = False
+) -> pd.DataFrame:
     data_dic = {}
 
     idx_label = []
@@ -276,7 +248,10 @@ def get_binned_stats(buckets, col1, col2, print_table=False):
     return summary_table
 
 
-def graph_binned_stats(binned_stats, show_graph=False):
+def graph_binned_stats(
+        binned_stats: pd.DataFrame,
+        show_graph: bool = False,
+) -> matplotlib.figure.Figure:
     """Draw the graph
 
     Args:
@@ -297,29 +272,16 @@ def graph_binned_stats(binned_stats, show_graph=False):
 
 
 def graph_binned_stats_with_prediction(
-        binned_stats,
-        line_x,
-        line_y,
-        line_style,
-        line_x2=None,
-        line_y2=None,
-        line_style_2=None,
-        show_graph=False
-):
-    """Draw the graph
+        binned_stats: pd.DataFrame,
+        line_x: pd.Series,
+        line_y: pd.Series,
+        line_style: str,
+        line_x2: pd.Series = None,
+        line_y2: pd.Series = None,
+        line_style_2: str = None,
+        show_graph: bool = False
+) -> matplotlib.figure.Figure:
 
-    Args:
-        binned_stats: pandas DataFrame
-            output summary table of function Binned_stats()
-        line_x: x input to graph for predictions
-        line_y: y output of prediction
-        line_style: style of line
-        line_x2: second x input to graph for predictions
-        line_y2: second y output of prediction
-        line_style_2: second style of line
-        show_graph: boolean, default True
-            show the graph or not
-    """
     col_name = list(binned_stats.columns.values)
     fig = plt.figure(figsize=(10, 8))
     plt.errorbar(
@@ -341,92 +303,59 @@ def graph_binned_stats_with_prediction(
     return fig
 
 
-def bayes_normal(mean, stdev, number_of_observations, sample_mean, sample_stdev):
-    """Print the table of binned stats
+def bayes_normal(
+        mean: float,
+        standard_deviation: float,
+        number_of_observations: int,
+        sample_mean: float,
+        sample_stdev: float,
+) -> (float, float):
 
-    Args:
-        mean: float
-            mean of the population
-        stdev: float
-            standard deviation of population
-        number_of_observations: int
-            number of observations
-        sample_mean: float
-            mean of the sample
-        sample_stdev: float
-            standard deviation of sample
-
-    Returns:
-        table of binned stats
-    """
-
-    post_m = (mean / stdev ** 2 + number_of_observations * sample_mean / sample_stdev ** 2) / \
-             (1 / stdev ** 2 + number_of_observations / sample_stdev ** 2)
-    post_sd = np.sqrt(1 / (1 / stdev ** 2 + number_of_observations / sample_stdev ** 2))
+    post_m = (mean / standard_deviation ** 2 + number_of_observations * sample_mean / sample_stdev ** 2) / \
+             (1 / standard_deviation ** 2 + number_of_observations / sample_stdev ** 2)
+    post_sd = np.sqrt(1 / (1 / standard_deviation ** 2 + number_of_observations / sample_stdev ** 2))
 
     return post_m, post_sd
 
 
-def rmse(error_values=None, prediction_values=None, truth=None):
-    """Calculate the RMSE of each model
-
-    Args:
-        error_values: pandas Dataframe
-            matrix of errors from different model, each column represents 1 series of error
-        prediction_values: pandas Dataframe
-            matrix of predictions from different model, each column represents 1 series of prediction
-        truth: pandas Dataframe
-            array of truth, 1 column
-
-    Returns:
-        table of RMSE
-    """
+def rmse(
+        error_values: pd.DataFrame = None,
+        prediction_values: pd.DataFrame = None,
+        truth: pd.DataFrame = None
+) -> np.ndarray:
     if error_values is not None:
         if prediction_values is None and truth is None:
             rmse_array = np.sqrt(np.mean(error_values ** 2, axis=0))
         else:
-            print("Error: only define errorValues, or only define PredictionValue and Truth")
-            return None
+            raise Exception("Only define errorValues, or only define PredictionValue and Truth")
     else:
         if prediction_values is not None and truth is not None:
             rmse_array = np.sqrt(np.mean((prediction_values.transpose() - truth) ** 2))
         else:
-            print("Error: only define errorValues, or only define PredictionValue and Truth")
-            return None
+            raise Exception("Only define errorValues, or only define PredictionValue and Truth")
 
     return rmse_array
 
 
-def model_test(error_values=None, prediction_values=None, truth=None):
-    """calculate the RMSE of each model and p-value matrix and result of pairwise comparison among models
-
-    Args:
-        error_values: pandas Dataframe
-            matrix of errors from different model, each column represents 1 series of error
-        prediction_values: pandas Dataframe
-            matrix of predictions from different model, each column represents 1 series of prediction
-        truth: pandas Dataframe
-            array of truth, 1 column
-
-    Returns:
-        table of RMSE and p-value matrix of each model
-    """
+def model_test(
+        error_values: pd.DataFrame = None,
+        prediction_values: pd.DataFrame = None,
+        truth: pd.DataFrame = None
+) -> pd.DataFrame:
     if error_values is not None:
         if prediction_values is None and truth is None:
             rmse_array = np.sqrt(np.mean(error_values ** 2, axis=0))
             sq_err = error_values.values ** 2
             names = list(error_values.columns.values)
         else:
-            print("Error: only define errorValues, or only define PredictionValue and Truth")
-            return None
+            raise Exception("Only define errorValues, or only define PredictionValue and Truth")
     else:
         if prediction_values is not None and truth is not None:
             rmse_array = np.sqrt(np.mean((prediction_values.values - truth.values) ** 2, axis=0))
             sq_err = (prediction_values.values - truth.values) ** 2
             names = list(prediction_values.columns.values)
         else:
-            print("Error: only define errorValues, or only define PredictionValue and Truth")
-            return None
+            raise Exception("Only define errorValues, or only define PredictionValue and Truth")
 
     pvalue_matrix = np.empty(shape=(sq_err.shape[1], sq_err.shape[1]))
     pvalue_matrix[:] = np.nan
@@ -445,29 +374,17 @@ def model_test(error_values=None, prediction_values=None, truth=None):
     return summary_table
 
 
-def average(number_array, row_weight):
-    """calculate a weighted mean
-
-    Args:
-        number_array: Array of numbers.
-        row_weight: weight of each number in average
-
-    Returns:
-        A weighted mean
-    """
+def average(
+        number_array: list,
+        row_weight: list,
+) -> float:
 
     return np.average(number_array, weights=row_weight)
 
 
-def stddev(number_array, row_weight):
-    """calculate a weighted standard deviation
-
-    Args:
-        number_array: Array of numbers.
-        row_weight: weight of each number in average
-
-    Returns:
-        A weighted standard deviation
-    """
+def stddev(
+        number_array: list,
+        row_weight: list,
+) -> float:
 
     return np.sqrt(np.cov(number_array, aweights=row_weight))
