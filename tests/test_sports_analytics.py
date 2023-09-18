@@ -7,7 +7,7 @@ from src.cbssa import legacy
 
 class TestSportsAnalytics:
     def test_logistic_reg_train(self):
-        data = pd.read_csv("test_data.csv")
+        data = pd.read_csv("test_data/logitRegData.csv")
         data.head()
 
         logit_reg_x = np.stack([data.dist.values, data.dist.values ** 2 / 100, data.dist.values ** 3 / 1000]).T
@@ -17,7 +17,7 @@ class TestSportsAnalytics:
         mdl = sports_analytics.logistic_reg_train(data_logit_reg_x, data_logit_reg_y)
         mdl_legacy = legacy.LogisticRegTrain(data_logit_reg_x, data_logit_reg_y)
 
-        assert mdl.SummaryTable.at["Coefficients", "const"] == 16.429114791522277
-        assert mdl.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.14254162236818144
-        assert mdl_legacy.SummaryTable.at["Coefficients", "const"] == 16.429114791522277
-        assert mdl_legacy.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.14254162236818144
+        assert mdl.SummaryTable.at["Coefficients", "const"] == 14.043798183157614
+        assert mdl.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
+        assert mdl_legacy.SummaryTable.at["Coefficients", "const"] == 14.043798183157614
+        assert mdl_legacy.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
