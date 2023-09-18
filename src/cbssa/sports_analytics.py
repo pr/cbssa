@@ -11,7 +11,8 @@ def logistic_reg_train(
         y: pd.DataFrame | np.ndarray,
         const: bool = True,
         weight: np.array = None,
-        missing: any = "delete"
+        missing: any = "delete",
+        print_table: bool = False,
 ) -> discrete_model.BinaryResultsWrapper | None:
     """Train a Logistic Regression Model
 
@@ -27,6 +28,8 @@ def logistic_reg_train(
             weight of each column
         missing: "delete","nearest","mean","median",constant number
             the method to handle the missing value
+        print_table: boolean, default False
+            print the table or not
 
     Returns:
         A logistic regression model
@@ -89,7 +92,9 @@ def logistic_reg_train(
     except:
         pass
 
-    print(summary_table)
+    if print_table:
+        print(summary_table)
+
     result.SummaryTable = summary_table
     pd.set_option("display.float_format", lambda a: "%.2f" % a)
 
@@ -124,7 +129,7 @@ def logistic_reg_predict(model, x):
     return result
 
 
-def linear_reg_train(x, y, const=True, weight=None, missing="delete"):
+def linear_reg_train(x, y, const=True, weight=None, missing="delete", print_table=False):
     """Train a Linear Regression Model
 
     Args:
@@ -139,6 +144,8 @@ def linear_reg_train(x, y, const=True, weight=None, missing="delete"):
             weight of each column
         missing: "delete","nearest","mean","median",constant number
             the method to handle the missing value
+        print_table: boolean, default False
+            print the table or not
 
     Returns:
         A linear regression model
@@ -202,7 +209,9 @@ def linear_reg_train(x, y, const=True, weight=None, missing="delete"):
     except:
         pass
 
-    print(summary_table)
+    if print_table:
+        print(summary_table)
+
     result.SummaryTable = summary_table
 
     return result
@@ -234,8 +243,8 @@ def linear_reg_predict(model, x):
     return result
 
 
-def print_binned_stats(buckets, col1, col2):
-    """Print the table of binned stats
+def get_binned_stats(buckets, col1, col2, print_table=False):
+    """Get the table of binned stats
 
     Args:
         buckets: list of float
@@ -244,6 +253,8 @@ def print_binned_stats(buckets, col1, col2):
             reference column
         col2: pandas DataFrame, or numpy ndarray
             data value column
+        print_table: boolean, default False
+            print the table or not
 
     Returns:
         table of binned stats
@@ -272,23 +283,30 @@ def print_binned_stats(buckets, col1, col2):
 
     order_list = ["Bins", "Count", "Avg " + col1.name, "Avg " + col2.name, "Stderr " + col2.name]
     summary_table = pd.DataFrame(data=data_dic)[order_list]
-    print(summary_table)
+
+    if print_table:
+        print(summary_table)
+
     return summary_table
 
 
-def graph_binned_stats(binned_stats):
+def graph_binned_stats(binned_stats, show_graph=False):
     """Draw the graph
 
     Args:
         binned_stats: pandas DataFrame
             output summary table of function Binned_stats()
+        show_graph: boolean, default True
+            show the graph or not
     """
     col_name = list(binned_stats.columns.values)
     fig = plt.figure(figsize=(10, 8))
     plt.errorbar(
         binned_stats[col_name[2]], binned_stats[col_name[3]], yerr=binned_stats[col_name[4]], fmt=".", capsize=5
     )
-    plt.show()
+    if show_graph:
+        plt.show()
+
     return fig
 
 
@@ -299,7 +317,8 @@ def graph_binned_stats_with_prediction(
         line_style,
         line_x2=None,
         line_y2=None,
-        line_style_2=None
+        line_style_2=None,
+        show_graph=False
 ):
     """Draw the graph
 
@@ -312,6 +331,8 @@ def graph_binned_stats_with_prediction(
         line_x2: second x input to graph for predictions
         line_y2: second y output of prediction
         line_style_2: second style of line
+        show_graph: boolean, default True
+            show the graph or not
     """
     col_name = list(binned_stats.columns.values)
     fig = plt.figure(figsize=(10, 8))
@@ -327,6 +348,9 @@ def graph_binned_stats_with_prediction(
 
     plt.xlabel("distance")
     plt.ylabel("make")
+
+    if show_graph:
+        plt.show()
 
     return fig
 
