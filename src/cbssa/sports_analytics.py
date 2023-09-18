@@ -115,9 +115,8 @@ def logistic_reg_predict(model, x):
         Array of predictions
     """
     if "const" in model.SummaryTable.columns.values:
-        print("adding constant")
         x = sm.add_constant(x, has_constant="add")
-    print(x)
+
     prediction = model.predict(x)
 
     data = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
