@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 
-from src.cbssa import sports_analytics
-from src.cbssa import legacy
+import cbssa
 
 
 def get_data():
@@ -16,8 +15,8 @@ def get_model():
     data_logit_reg_x = pd.DataFrame(data=logit_reg_x, columns=['dist', 'dist^2/100', 'dist^3/1000'])
     data_logit_reg_y = data.make
 
-    mdl = sports_analytics.logistic_reg_train(data_logit_reg_x, data_logit_reg_y)
-    mdl_legacy = legacy.LogisticRegTrain(data_logit_reg_x, data_logit_reg_y)
+    mdl = cbssa.logistic_regression.train(data_logit_reg_x, data_logit_reg_y)
+    mdl_legacy = cbssa.legacy.LogisticRegTrain(data_logit_reg_x, data_logit_reg_y)
 
     return mdl, mdl_legacy
 
@@ -46,8 +45,8 @@ class TestBackwardsCompatibility:
 
         pred_x = pd.read_excel("test_data/predictionData.xlsx", sheet_name="predData")
 
-        prediction = sports_analytics.logistic_reg_predict(mdl, pred_x)
-        prediction_legacy = legacy.LogisticRegPredict(mdl_legacy, pred_x)
+        prediction = cbssa.logistic_regression.predict(mdl, pred_x)
+        prediction_legacy = cbssa.legacy.LogisticRegPredict(mdl_legacy, pred_x)
 
         assert prediction.at[0, "prediction"] == 0.9973873291026644
         assert prediction.at[2, "dist^2/100"] == 2.89
@@ -61,8 +60,8 @@ class TestBackwardsCompatibility:
         data = get_data()
         bins_set, include_se, se_multiplier_set = get_bins_set()
 
-        summary_table = sports_analytics.get_binned_stats(bins_set, data.dist, data.make)
-        summary_table_legacy = legacy.Binned_stats(bins_set, data.dist, data.make, include_se, se_multiplier_set)
+        summary_table = cbssa.data_binning.get(bins_set, data.dist, data.make)
+        summary_table_legacy = cbssa.legacy.Binned_stats(bins_set, data.dist, data.make, include_se, se_multiplier_set)
 
         assert summary_table.at[2, "Bins"] == "[25,30)"
         assert summary_table.at[8, "Avg make"] == 0.4492753623188406
