@@ -90,3 +90,12 @@ class TestSportsAnalytics:
 
         sports_analytics.graph_binned_stats_with_prediction(summary_table, prediction.dist, prediction.prediction, "")
 
+    def test_bayes_normal(self):
+        mean, stdev = sports_analytics.bayes_normal(0.3, 4, 5, 2.8, 1)
+        mean_legacy, stdev_legacy = legacy.Bayes_normal(0.3, 4, 5, 2.8, 1)
+
+        assert mean == 2.769135802469136
+        assert stdev == 0.4444444444444444
+
+        assert mean_legacy == 2.769135802469136
+        assert stdev_legacy == 0.4444444444444444
