@@ -73,7 +73,6 @@ def logistic_reg_train(
         mdl_coeff = pd.DataFrame(data=dict(result.params), index=["Coefficients"])
         mdl_se = pd.DataFrame(data=dict(result.bse), index=["Std error"])
         mdl_pvalue = pd.DataFrame(data=dict(result.pvalues), index=["p-value"])
-
     except:
         mdl_coeff = pd.DataFrame(data=result.params, index=columns_name, columns=["Coefficients"]).T
         mdl_se = pd.DataFrame(data=result.bse, index=columns_name, columns=["Std error"]).T
@@ -265,6 +264,8 @@ def get_binned_stats(buckets, col1, col2, print_table=False):
     avg1 = []
     avg2 = []
     stderr2 = []
+    i = None
+
     for i in range(len(buckets) - 1):
         idx_label.append("[%s,%s)" % (buckets[i], buckets[i + 1]))
         count.append(col1[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].count())
@@ -272,15 +273,16 @@ def get_binned_stats(buckets, col1, col2, print_table=False):
         avg2.append(col2[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].mean())
         stderr2.append(col2[(col1 >= buckets[i]) & (col1 < buckets[i + 1])].sem() * 2)
 
-    idx_label[-1] = ("[%s,%s]" % (buckets[i], buckets[i + 1]))
+    if i:
+        idx_label[-1] = f"[{buckets[i]}, {buckets[i + 1]}]"
 
     data_dic["Bins"] = idx_label
     data_dic["Count"] = count
-    data_dic["Avg " + col1.name] = avg1
-    data_dic["Avg " + col2.name] = avg2
-    data_dic["Stderr " + col2.name] = stderr2
+    data_dic[f"Avg {col1.name}"] = avg1
+    data_dic[f"Avg {col2.name}"] = avg2
+    data_dic[f"Stderr {col2.name}"] = stderr2
 
-    order_list = ["Bins", "Count", "Avg " + col1.name, "Avg " + col2.name, "Stderr " + col2.name]
+    order_list = ["Bins", "Count", f"Avg {col1.name}", f"Avg {col2.name}", f"Stderr {col2.name}"]
     summary_table = pd.DataFrame(data=data_dic)[order_list]
 
     if print_table:

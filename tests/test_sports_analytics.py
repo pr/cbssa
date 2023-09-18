@@ -21,11 +21,7 @@ def get_model():
 
 
 def get_bins_set():
-    bins_set = [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]
-    include_se = True
-    se_multiplier_set = 2
-
-    return bins_set, include_se, se_multiplier_set
+    return [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70]
 
 
 class TestSportsAnalytics:
@@ -49,30 +45,33 @@ class TestSportsAnalytics:
 
     def test_get_binned_stats(self):
         data = get_data()
-        bins_set, include_se, se_multiplier_set = get_bins_set()
 
-        summary_table = sports_analytics.get_binned_stats(bins_set, data.dist, data.make)
+        summary_table = sports_analytics.get_binned_stats(get_bins_set(), data.dist, data.make)
 
         assert summary_table.at[2, "Bins"] == "[25,30)"
         assert summary_table.at[8, "Avg make"] == 0.4492753623188406
 
-    def test_graph_binned_stats(self):
+    def test_get_binned_stats_empty_list(self):
         data = get_data()
-        bins_set, _, _ = get_bins_set()
+        bins_set = []
 
         summary_table = sports_analytics.get_binned_stats(bins_set, data.dist, data.make)
+        assert summary_table.empty
+
+    def test_graph_binned_stats(self):
+        data = get_data()
+
+        summary_table = sports_analytics.get_binned_stats(get_bins_set(), data.dist, data.make)
 
         sports_analytics.graph_binned_stats(summary_table)
 
     def test_graph_binned_stats_with_prediction(self):
         data = get_data()
-        bins_set, _, _ = get_bins_set()
-        mdl = get_model()
 
         pred_x = pd.read_excel("test_data/predictionData.xlsx", sheet_name="predData")
 
-        summary_table = sports_analytics.get_binned_stats(bins_set, data.dist, data.make)
-        prediction = sports_analytics.logistic_reg_predict(mdl, pred_x)
+        summary_table = sports_analytics.get_binned_stats(get_bins_set(), data.dist, data.make)
+        prediction = sports_analytics.logistic_reg_predict(get_model(), pred_x)
 
         sports_analytics.graph_binned_stats_with_prediction(summary_table, prediction.dist, prediction.prediction, "")
 
