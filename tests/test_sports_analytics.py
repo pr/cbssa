@@ -25,8 +25,8 @@ class TestSportsAnalytics:
         data, data_logit_reg_x, data_logit_reg_y = get_data()
         model = cbssa.logistic_regression.train(data_logit_reg_x, data_logit_reg_y)
 
-        assert model.SummaryTable.at["Coefficients", "const"] == 14.043798183157614
-        assert model.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
+        assert model.summary_table.at["Coefficients", "const"] == 14.043798183157614
+        assert model.summary_table.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
 
     def test_logistic_reg_train_bad_missing_input(self):
         data, data_logit_reg_x, data_logit_reg_y = get_data()

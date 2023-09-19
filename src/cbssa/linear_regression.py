@@ -68,7 +68,7 @@ def train(
     summary_table.loc["Number valid obs", summary_table.columns.values[0]] = result.df_resid
     summary_table.loc["Total obs", summary_table.columns.values[0]] = result.nobs
 
-    pd.set_option("display.float_format", lambda a: "%.2f" % a)
+    pd.set_option("display.float_format", lambda a: "%.4f" % a)
     summary_table = summary_table.fillna("")
 
     try:
@@ -79,7 +79,7 @@ def train(
     if print_table:
         print(summary_table)
 
-    result.SummaryTable = summary_table
+    result.summary_table = summary_table
 
     return result
 
@@ -89,14 +89,15 @@ def predict(
         x: pd.DataFrame | np.ndarray,
 ) -> pd.DataFrame:
 
-    if "const" in model.SummaryTable.columns.values:
+    if "const" in model.summary_table.columns.values:
         x = sm.add_constant(x)
 
     prediction = model.predict(x)
 
-    result = pd.DataFrame(data=x, columns=list(model.SummaryTable.columns.values))
-    if "const" in model.SummaryTable.columns.values:
+    result = pd.DataFrame(data=x, columns=list(model.summary_table.columns.values))
+    if "const" in model.summary_table.columns.values:
         result = result.drop(["const"], axis=1)
+
     result["prediction"] = prediction
 
     return result

@@ -34,8 +34,8 @@ class TestBackwardsCompatibility:
     def test_logistic_reg_train(self):
         mdl, mdl_legacy = get_model()
 
-        assert mdl.SummaryTable.at["Coefficients", "const"] == 14.043798183157614
-        assert mdl.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
+        assert mdl.summary_table.at["Coefficients", "const"] == 14.043798183157614
+        assert mdl.summary_table.at["Coefficients", "dist^3/1000"] == -0.12182629636884296
 
         assert mdl_legacy.SummaryTable.at["Coefficients", "const"] == 14.043798183157614
         assert mdl_legacy.SummaryTable.at["Coefficients", "dist^3/1000"] == -0.12182629636884296

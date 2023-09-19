@@ -25,7 +25,8 @@ def rmse(
 def model_test(
         error_values: pd.DataFrame = None,
         prediction_values: pd.DataFrame = None,
-        truth: pd.DataFrame = None
+        truth: pd.DataFrame = None,
+        print_table: bool = False
 ) -> pd.DataFrame:
     if error_values is not None:
         if prediction_values is None and truth is None:
@@ -54,6 +55,9 @@ def model_test(
     summary_table = pd.DataFrame(data=pd.DataFrame(np.concatenate([rmse_array[:, None], pvalue_matrix], axis=1).T))
     summary_table.columns = names
     summary_table.index = ["RMSE"] + names
-    print(summary_table)
+
+    if print_table:
+        print(summary_table)
+
     summary_table = summary_table.fillna("")
     return summary_table
