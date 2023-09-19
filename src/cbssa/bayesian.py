@@ -2,15 +2,17 @@ import numpy as np
 
 
 def normal(
-        mean: float,
-        standard_deviation: float,
-        number_of_observations: int,
+        prior_mean: float,
+        prior_standard_deviation: float,
+        sample_number_of_observations: int,
         sample_mean: float,
-        sample_stdev: float,
+        sample_standard_deviation: float,
 ) -> (float, float):
+    post_mean = (prior_mean / prior_standard_deviation ** 2 + sample_number_of_observations * sample_mean /
+                 sample_standard_deviation ** 2) / (1 / prior_standard_deviation ** 2 + sample_number_of_observations /
+                                                    sample_standard_deviation ** 2)
 
-    post_m = (mean / standard_deviation ** 2 + number_of_observations * sample_mean / sample_stdev ** 2) / \
-             (1 / standard_deviation ** 2 + number_of_observations / sample_stdev ** 2)
-    post_sd = np.sqrt(1 / (1 / standard_deviation ** 2 + number_of_observations / sample_stdev ** 2))
+    post_standard_deviation = np.sqrt(1 / (1 / prior_standard_deviation ** 2 +
+                                           sample_number_of_observations / sample_standard_deviation ** 2))
 
-    return post_m, post_sd
+    return post_mean, post_standard_deviation
