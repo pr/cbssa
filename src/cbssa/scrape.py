@@ -7,6 +7,16 @@ import datetime
 import itertools
 
 
+def _parse_table(soup, limit, index):
+    column_headers = [th.getText() for th in soup.findAll("thead", limit=limit)[index].findAll("th")]
+    data_rows = soup.findAll("tbody", limit=limit)[index].findAll("tr")[0:]
+    standings_data = [
+        [td.getText() for td in data_rows[i].findAll(["th", "td"])] for i in range(len(data_rows))
+    ]
+
+    return column_headers, data_rows, standings_data
+
+
 def mlb(season_start_year: int) -> (pd.DataFrame, pd.DataFrame):
     url = f"https://www.baseball-reference.com/leagues/majors/{season_start_year}-schedule.shtml"
     html = urlopen(url)
@@ -116,15 +126,8 @@ def nfl(season_start_year: int) -> (pd.DataFrame, pd.DataFrame):
     html = urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
 
-    column_headers_afc = [th.getText() for th in soup.findAll("thead", limit=1)[0].findAll("th")]
-    data_rows_afc = soup.findAll("tbody", limit=1)[0].findAll("tr")[0:]
-    standings_data_afc = [[td.getText() for td in data_rows_afc[i].findAll(["th", "td"])] for i in
-                          range(len(data_rows_afc))]
-
-    column_headers_nfc = [th.getText() for th in soup.findAll("thead", limit=2)[1].findAll("th")]
-    data_rows_nfc = soup.findAll("tbody", limit=2)[1].findAll("tr")[0:]
-    standings_data_nfc = [[td.getText() for td in data_rows_nfc[i].findAll(["th", "td"])] for i in
-                          range(len(data_rows_nfc))]
+    column_headers_afc, data_rows_afc, standings_data_afc, = _parse_table(soup=soup, limit=1, index=0)
+    column_headers_nfc, data_rows_nfc, standings_data_nfc, = _parse_table(soup=soup, limit=2, index=1)
 
     standings_afc = pd.DataFrame(standings_data_afc, columns=column_headers_afc)
     standings_nfc = pd.DataFrame(
@@ -244,15 +247,8 @@ def nba(season_start_year: int) -> (pd.DataFrame, pd.DataFrame):
     html = urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
 
-    column_headers_east = [th.getText() for th in soup.findAll("thead", limit=1)[0].findAll("th")]
-    data_rows_east = soup.findAll("tbody", limit=1)[0].findAll("tr")[0:]
-    standings_data_east = [[td.getText() for td in data_rows_east[i].findAll(["th", "td"])] for i in
-                           range(len(data_rows_east))]
-
-    column_headers_west = [th.getText() for th in soup.findAll("thead", limit=2)[1].findAll("th")]
-    data_rows_west = soup.findAll("tbody", limit=2)[1].findAll("tr")[0:]
-    standings_data_west = [[td.getText() for td in data_rows_west[i].findAll(["th", "td"])] for i in
-                           range(len(data_rows_west))]
+    column_headers_east, data_rows_east, standings_data_east, = _parse_table(soup=soup, limit=1, index=0)
+    column_headers_west, data_rows_west, standings_data_west, = _parse_table(soup=soup, limit=2, index=1)
 
     standings_west = pd.DataFrame(standings_data_west, columns=column_headers_west)
     standings_west = standings_west[["Western Conference", "W", "L"]]
