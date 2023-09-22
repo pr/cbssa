@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 
-import cbssa
+from src import cbssa
 
 
 def get_data():

@@ -19,7 +19,7 @@ def average(
     return np.average(number_array, weights=row_weight)
 
 
-def stddev(
+def standard_deviation(
         number_array: list,
         row_weight: list,
 ) -> float:
