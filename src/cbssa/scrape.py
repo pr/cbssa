@@ -45,8 +45,7 @@ def mlb(season_start_year: int) -> (pd.DataFrame, pd.DataFrame):
     results.replace("Arizona D'Backs", "Arizona Diamondbacks", inplace=True)
     results["home margin"] = results["home score"] - results["away score"]
 
-    url_template = "https://www.baseball-reference.com/leagues/majors/{year}-standings.shtml"
-    url = url_template.format(year=season_start_year)
+    url = f"https://www.baseball-reference.com/leagues/majors/{season_start_year}-standings.shtml"
     html = urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
 
@@ -239,9 +238,7 @@ def nba(season_start_year: int) -> (pd.DataFrame, pd.DataFrame):
 
     schedule["home margin"] = schedule["home score"] - schedule["away score"]
 
-    url_template = "https://www.basketball-reference.com/leagues/NBA_{year}_standings.html"
-
-    url = url_template.format(year=season_start_year)
+    url = f"https://www.basketball-reference.com/leagues/NBA_{season_start_year}_standings.html"
     html = urlopen(url)
     soup = BeautifulSoup(html, "html.parser")
 
