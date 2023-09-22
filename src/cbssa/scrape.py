@@ -10,9 +10,7 @@ import itertools
 def _parse_table(soup, limit, index):
     column_headers = [th.getText() for th in soup.findAll("thead", limit=limit)[index].findAll("th")]
     data_rows = soup.findAll("tbody", limit=limit)[index].findAll("tr")[0:]
-    standings_data = [
-        [td.getText() for td in data_rows[i].findAll(["th", "td"])] for i in range(len(data_rows))
-    ]
+    standings_data = [[td.getText() for td in data_rows[i].findAll(["th", "td"])] for i in range(len(data_rows))]
 
     return column_headers, data_rows, standings_data
 
