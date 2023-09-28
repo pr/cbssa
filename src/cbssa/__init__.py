@@ -5,4 +5,5 @@ from . import linear_regression
 from . import logistic_regression
 from . import model_evaluation
 from . import scrape
+from . import simple_rating_system
 from . import utils
