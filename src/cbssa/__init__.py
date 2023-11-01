@@ -1,5 +1,6 @@
 from . import bayesian
 from . import data_binning
+from . import football
 from . import legacy
 from . import linear_regression
 from . import logistic_regression

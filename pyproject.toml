@@ -4,13 +4,13 @@ build-backend = "hatchling.build"
 
 [project]
 name = "cbssa"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="Columbia Business School", email="peter@peter.net" },
 ]
 description = "Columbia Business School Sports Analytics"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
